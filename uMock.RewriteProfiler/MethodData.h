@@ -16,7 +16,7 @@ struct MethodData
 
 	mdTypeDef ClassTypeDefinition;
 
-	mdToken MethodToken;
+	mdMethodDef MethodToken;
 	DWORD MethodAttributes;
 	PCCOR_SIGNATURE MethodSignature;
 	ULONG SignatureLength;

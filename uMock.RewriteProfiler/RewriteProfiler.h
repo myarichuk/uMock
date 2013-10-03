@@ -10,8 +10,8 @@ private:
 	long m_nRefCount;
 	bool m_CanUseV2Interfaces;
 
-	ICorProfilerInfo* m_corProfilerInfo;
-	ICorProfilerInfo2* m_corProfilerInfo2;
+	ICorProfilerInfo* m_CorProfilerInfo;
+	ICorProfilerInfo2* m_CorProfilerInfo2;
 	CLogger m_Logger;	
 
 	map<ModuleID,IMetaDataImport2*> m_MetadataImportByModuleId;

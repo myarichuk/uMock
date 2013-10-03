@@ -12,8 +12,8 @@ CRewriteProfiler::CRewriteProfiler()
 CRewriteProfiler::~CRewriteProfiler()
 {
 	m_Logger.Debug("CRewriteProfiler::~CRewriteProfiler()");
-	SAFE_RELEASE(m_corProfilerInfo);
-	SAFE_RELEASE(m_corProfilerInfo2);
+	SAFE_RELEASE(m_CorProfilerInfo);
+	SAFE_RELEASE(m_CorProfilerInfo2);
 
 	ReleaseMetadataCache();
 	InterlockedDecrement(&g_DllLockCount);
@@ -110,7 +110,7 @@ STDMETHODIMP CRewriteProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {			
 	m_Logger.Debug("CRewriteProfiler::Initialize()");
 
-	HRESULT hrRet = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void**)&m_corProfilerInfo);
+	HRESULT hrRet = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void**)&m_CorProfilerInfo);
 	if (FAILED(hrRet))
 	{
 		m_Logger.Error("Failed to get ICorProfilerInfo");
@@ -121,10 +121,10 @@ STDMETHODIMP CRewriteProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 		m_Logger.Debug("Retrieved ICorProfilerInfo");		
 	}
 
-	hrRet = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (void**)&m_corProfilerInfo2);
+	hrRet = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (void**)&m_CorProfilerInfo2);
 	if (FAILED(hrRet))
 	{
-		m_corProfilerInfo2 = nullptr;
+		m_CorProfilerInfo2 = nullptr;
 		m_Logger.Error("Failed to get ICorProfiler2. not supported?");
 		m_CanUseV2Interfaces = false;
 	}
@@ -141,7 +141,7 @@ STDMETHODIMP CRewriteProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	eventMask |= COR_PRF_MONITOR_ASSEMBLY_LOADS;
 	eventMask |= COR_PRF_DISABLE_INLINING;
 	eventMask |= COR_PRF_DISABLE_OPTIMIZATIONS;
-	hrRet = m_corProfilerInfo->SetEventMask(eventMask);
+	hrRet = m_CorProfilerInfo->SetEventMask(eventMask);
 
 	if(hrRet == S_OK)
 	{
@@ -160,7 +160,7 @@ STDMETHODIMP CRewriteProfiler::JITCompilationStarted(FunctionID functionID, BOOL
 	m_Logger.Debug("CRewriteProfiler::JITCompilationStarted()");
 	wstring methodName;	
 
-	MetadataHelper::GetFullMethodName(m_corProfilerInfo,functionID,&methodName,1);
+	MetadataHelper::GetFullMethodName(m_CorProfilerInfo,functionID,&methodName,1);
 
 	m_Logger.Debug(wstring(L"JIT compilation started. Method Name = ") + methodName);
 	return S_OK;
@@ -174,7 +174,7 @@ STDMETHODIMP CRewriteProfiler::ModuleLoadFinished(ModuleID moduleID, HRESULT hrS
 	AssemblyID moduleAssemblyId;
 	wstring moduleName;
 	
-	if(SUCCEEDED(MetadataHelper::GetModuleInfo(m_corProfilerInfo,moduleID,&moduleName,&moduleAssemblyId)))
+	if(SUCCEEDED(MetadataHelper::GetModuleInfo(m_CorProfilerInfo,moduleID,&moduleName,&moduleAssemblyId)))
 	{
 		debugMessageStream << L"Module loaded (module name = " << moduleName << L", loading status = "<< hrStatus << L")";
 		m_Logger.Debug(debugMessageStream.str());
@@ -182,7 +182,7 @@ STDMETHODIMP CRewriteProfiler::ModuleLoadFinished(ModuleID moduleID, HRESULT hrS
 
 
 	if(m_CanUseV2Interfaces && 
-	   SUCCEEDED(MetadataHelper::GetMetadataImportByModuleID(m_corProfilerInfo2,moduleID,&moduleMetadataImport)))
+	   SUCCEEDED(MetadataHelper::GetMetadataImportByModuleID(m_CorProfilerInfo2,moduleID,&moduleMetadataImport)))
 	{
 		if(moduleMetadataImport == nullptr)
 		{

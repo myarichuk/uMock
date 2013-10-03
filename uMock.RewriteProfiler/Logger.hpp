@@ -25,8 +25,8 @@ class CLogger
 public:	
 	CLogger()
 	{		
-		static log4cpp::Appender *m_FileAppender;
-		static log4cpp::Layout *m_Layout;
+		static Appender *m_FileAppender;
+		static Layout *m_Layout;
 		static bool isLoggerInitialized;		
 
 		if(!isLoggerInitialized) //guarantee constructor code will run only once

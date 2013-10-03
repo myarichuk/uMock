@@ -69,6 +69,8 @@ static HRESULT GetTypeDefinitions(IMetaDataImport2* pIMetaDataImport,vector<mdTy
 	return hr;
 }
 
+
+
 static HRESULT GetMethodData(ICorProfilerInfo* corProfilerInfo,wstring methodName,OUT MethodData* methodData)
 {
 	HRESULT hr = S_OK;		
@@ -78,17 +80,14 @@ static HRESULT GetMethodData(ICorProfilerInfo* corProfilerInfo,wstring methodNam
 
 static HRESULT GetModuleInfo(ICorProfilerInfo* corProfilerInfo,IN ModuleID moduleId,OUT wstring *moduleName,OUT AssemblyID *moduleAssemblyId)
 { 
+	assert(moduleName != nullptr);
+
 	HRESULT hr = S_OK;		
 	LPCBYTE moduleLoadAddress;
 	WCHAR moduleNameBuffer[NAME_BUFFER_SIZE];
 	DWORD moduleFlags;	
 	ULONG moduleNameBufferSize;
-	
-	if(moduleName == nullptr)
-	{
-		return E_FAIL;
-	}
-	
+		
 	corProfilerInfo->GetModuleInfo(moduleId,&moduleLoadAddress,NAME_BUFFER_SIZE,&moduleNameBufferSize,moduleNameBuffer,moduleAssemblyId);
 	*moduleName = wstring(moduleNameBuffer);
 
@@ -131,7 +130,7 @@ static HRESULT GetFunctionDataByFunctionID(ICorProfilerInfo* corProfilerInfo,Fun
 
 	hr1 = corProfilerInfo->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (LPUNKNOWN *) &metadataImport, funcToken);
 	hr2 = corProfilerInfo->GetFunctionInfo(functionID,functionClassId,functionModuleId,funcToken);	
-
+	
 	return SUCCEEDED(hr1) && SUCCEEDED(hr2);
 }
 
@@ -161,7 +160,7 @@ static HRESULT GetFullMethodName(ICorProfilerInfo* corProfilerInfo,FunctionID fu
 				wstringstream methodNameStream;
 				methodNameStream << szClass << "." << szFunction;
 				*methodName = methodNameStream.str();
-			}
+			}			
 		}
 		// release our reference to the metadata
 		pIMetaDataImport->Release();
